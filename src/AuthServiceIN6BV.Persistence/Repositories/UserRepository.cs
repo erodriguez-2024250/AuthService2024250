@@ -5,9 +5,9 @@ using AuthServiceIN6BV.Persistence.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 
-namespace AuthServiceIN6BV.Persistence.Repository;
+namespace AuthServiceIN6BV.Persistence.Repositories;
 
-public class UserRepositories(ApplicationDbContext context) : IUserRepository
+public class UserRepository(ApplicationDbContext context) : IUserRepository
 {
     public async Task<User> GetByIdAsync(string id)
     {

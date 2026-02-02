@@ -3,7 +3,7 @@ using AuthServiceIN6BV.Domain.Interface;
 using AuthServiceIN6BV.Persistence.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace AuthServiceIN6BV.Persistence.Repository;
+namespace AuthServiceIN6BV.Persistence.Repositories;
 
 public class RoleRepository(ApplicationDbContext context) : IRoleRepository
 {
