@@ -5,7 +5,7 @@ using AuthServiceIN6BV.Application.Extensions;
 using AuthServiceIN6BV.Application.Validators;
 using AuthServiceIN6BV.Domain.Constants;
 using AuthServiceIN6BV.Domain.Entities;
-using AuthServiceIN6BV.Domain.Interfaces;
+using AuthServiceIN6BV.Domain.Interface;
 using AuthServiceIN6BV.Domain.Enums;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -45,7 +45,7 @@ public class AuthService(
 
         if (registerDto.ProfilePicture != null && registerDto.ProfilePicture.Size > 0)
         {
-            var (isValid, errorMessage) = FileValidator.ValidateImage(registerDto.ProfilePicture);
+            var (isValid, errorMessage) = FileValidators.ValidateImage(registerDto.ProfilePicture);
             if (!isValid)
             {
                 logger.LogWarning($"File validation failed: {errorMessage}");
@@ -54,10 +54,10 @@ public class AuthService(
 
             try
             {
-                var fileName = FileValidator.GenerateSecureFileName(registerDto.ProfilePicture.FileName);
+                var fileName = FileValidators.GenerateSecureFileName(registerDto.ProfilePicture.FileName);
                 profilePicturePath = await _cloudinaryService.UploadImageAsync(registerDto.ProfilePicture, fileName);
             }
-            catch (Exception)
+            catch (System.Exception)
             {
                 logger.LogImageUploadError();
                 throw new BusinessException(ErrorCodes.IMAGE_UPLOAD_FAILED, "Failed to upload profile image");
@@ -69,7 +69,7 @@ public class AuthService(
         }
 
         // Crear nuevo usuario y entidades relacionadas
-        var emailVerificationToken = TokenGenerator.GenerateEmailVerificationToken();
+        var emailVerificationToken = TokenGeneratorService.GenerateEmailVerificationToken();
 
         var userId = UuidGenerator.GenerateUserId();
         var userProfileId = UuidGenerator.GenerateUserId();
@@ -131,7 +131,7 @@ public class AuthService(
                 await emailService.SendEmailVerificationAsync(createdUser.Email, createdUser.Username, emailVerificationToken);
                 logger.LogInformation("Verification email sent");
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 logger.LogError(ex, "Failed to send verification email");
             }
@@ -184,7 +184,7 @@ public class AuthService(
             throw new UnauthorizedAccessException("Invalid credentials");
         }
 
-        logger.LogUserLoggedIn();
+        logger.LogUserLogginIn();
 
         // Generar token JWT
         var token = jwtTokenService.GenerateToken(user);
@@ -197,7 +197,7 @@ public class AuthService(
             Message = "Login exitoso",
             Token = token,
             UserDetails = MapToUserDetailsDto(user),
-            ExpiresAt = DateTime.UtcNow.AddMinutes(expiryMinutes)
+            ExpireAt = DateTime.UtcNow.AddMinutes(expiryMinutes)
         };
     }
 
@@ -256,7 +256,7 @@ public class AuthService(
         {
             await emailService.SendWelcomeEmailAsync(user.Email, user.Username);
         }
-        catch (Exception ex)
+        catch (System.Exception ex)
         {
             logger.LogError(ex, "Failed to send welcome email to {Email}", user.Email);
         }
@@ -299,7 +299,7 @@ public class AuthService(
         }
 
         // Generar nuevo token
-        var newToken = TokenGenerator.GenerateEmailVerificationToken();
+        var newToken = TokenGeneratorService.GenerateEmailVerificationToken();
         user.UserEmail.EmailVerificationToken = newToken;
         user.UserEmail.EmailVerificationTokenExpiry = DateTime.UtcNow.AddHours(24);
 
@@ -316,7 +316,7 @@ public class AuthService(
                 Data = new { email = user.Email, sent = true }
             };
         }
-        catch (Exception ex)
+        catch (System.Exception ex)
         {
             logger.LogError(ex, "Failed to resend verification email to {Email}", user.Email);
             return new EmailResponseDto
@@ -343,7 +343,7 @@ public class AuthService(
         }
 
         // Generar token de reset
-        var resetToken = TokenGenerator.GeneratePasswordResetToken();
+        var resetToken = TokenGeneratorService.GeneratePasswordResetToken();
 
         if (user.UserPasswordReset == null)
         {
@@ -368,7 +368,7 @@ public class AuthService(
             await emailService.SendPasswordResetAsync(user.Email, user.Username, resetToken);
             logger.LogInformation("Password reset email sent to {Email}", user.Email);
         }
-        catch (Exception ex)
+        catch (System.Exception ex)
         {
             logger.LogError(ex, "Failed to send password reset email to {Email}", user.Email);
         }

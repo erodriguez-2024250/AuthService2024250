@@ -144,14 +144,14 @@ public class EmailService(IConfiguration configuration, ILogger<EmailService> lo
                 logger.LogError(authEx, "Gmail authentication failed. Check app password.");
                 throw new InvalidOperationException($"Gmail authentication failed: {authEx.Message}. Please check your app password.", authEx);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 logger.LogError(ex, "Failed to send email");
                 throw;
             }
             logger.LogInformation("Email processed");
         }
-        catch (Exception ex)
+        catch (System.Exception ex)
         {
             logger.LogError(ex, "Failed to send email");
 
